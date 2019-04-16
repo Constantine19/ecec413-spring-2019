@@ -32,7 +32,7 @@ void print_matrix (const Matrix);
 float get_random_number (int, int);
 int check_results (float *, float *, unsigned int, float);
 
-struct arr_entry 
+struct my_struc 
 {
     int elements;
     int id;
@@ -122,7 +122,7 @@ gauss_eliminate_using_pthreads (float *U_mt)
     for (elements = 0; elements < num_elements; elements++) // perform Gaussian elimination
     {
         pthread_t thread_arr[num_threads];
-        struct arr_entry* entry_point = malloc(num_threads * sizeof(struct arr_entry));
+        struct my_struc* entry_point = malloc(num_threads * sizeof(struct my_struc));
 
         unsigned int i, j, k, m;
         for (i = 0; i < num_threads; i++)
@@ -163,7 +163,7 @@ gauss_eliminate_using_pthreads (float *U_mt)
 void *row_reduction(void *s)
 {
     unsigned int idx_r;
-    struct arr_entry* myStruct = (struct arr_entry*) s;
+    struct my_struc* myStruct = (struct my_struc*) s;
     int elements = myStruct->elements;
     int id = myStruct->id;
     float* U_mt = myStruct->mat;
@@ -185,7 +185,7 @@ void *row_reduction(void *s)
 
 void *elimination(void *s)
 {
-    struct arr_entry* myStruct = (struct arr_entry*) s;
+    struct my_struc* myStruct = (struct my_struc*) s;
     int elements = myStruct->elements;
     int id = myStruct->id;
     float* U_mt = myStruct->mat;
