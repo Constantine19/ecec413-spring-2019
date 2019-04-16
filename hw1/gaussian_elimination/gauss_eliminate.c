@@ -123,7 +123,8 @@ gauss_eliminate_using_pthreads (float *U_mt)
     {
         pthread_t thread_arr[num_threads];
         struct arr_entry* entry_point = malloc(num_threads * sizeof(struct arr_entry));
-        int i, j, k, m;
+
+        unsigned int i, j, k, m;
         for (i = 0; i < num_threads; i++)
         {
             entry_point[i].elements = elements;
@@ -161,7 +162,7 @@ gauss_eliminate_using_pthreads (float *U_mt)
 
 void *row_reduction(void *s)
 {
-    int idx_r;
+    unsigned int idx_r;
     struct arr_entry* myStruct = (struct arr_entry*) s;
     int elements = myStruct->elements;
     int id = myStruct->id;
@@ -169,6 +170,7 @@ void *row_reduction(void *s)
 
     for (idx_r = elements+id+1; idx_r < num_elements;)
     {
+         /* Chunking */
         float num = U_mt[num_elements * elements + idx_r];
         float denom = U_mt[num_elements * elements + elements];
         float div_step = num / denom;
@@ -183,11 +185,11 @@ void *row_reduction(void *s)
 
 void *elimination(void *s)
 {
-    int  idx_el_1, idx_el_2;
     struct arr_entry* myStruct = (struct arr_entry*) s;
     int elements = myStruct->elements;
     int id = myStruct->id;
     float* U_mt = myStruct->mat;
+    unsigned int  idx_el_1, idx_el_2;
 
     for (idx_el_1 = (elements + id)+1; idx_el_1 < num_elements; )
     {
@@ -202,7 +204,6 @@ void *elimination(void *s)
         U_mt[num_elements * idx_el_1 + elements] = 0;
         idx_el_1 = idx_el_1 + num_threads;
   }
-
   pthread_exit(0);
 }
 
