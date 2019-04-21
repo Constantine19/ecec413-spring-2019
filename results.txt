@@ -1,0 +1,60 @@
+The base of the trapezoid is 0.000001 
+Reference solution computed using single-threaded version = 5.764669 
+time = 5.39 s
+Solution computed using 2 threads = 5.764669 
+time = 2
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 11.11 s
+Solution computed using 2 threads = 5.764669 
+time = 2
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 16.04 s
+Solution computed using 2 threads = 5.764669 
+time = 2
+The base of the trapezoid is 0.000001 
+Reference solution computed using single-threaded version = 5.764669 
+time = 5.61 s
+Solution computed using 4 threads = 5.764669 
+time = 4
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 10.70 s
+Solution computed using 4 threads = 5.764669 
+time = 4
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 16.90 s
+Solution computed using 4 threads = 5.764669 
+time = 4
+The base of the trapezoid is 0.000001 
+Reference solution computed using single-threaded version = 5.764669 
+time = 5.35 s
+Solution computed using 8 threads = 5.764669 
+time = 8
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 11.22 s
+Solution computed using 8 threads = 5.764669 
+time = 8
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 16.67 s
+Solution computed using 8 threads = 5.764669 
+time = 8
+The base of the trapezoid is 0.000001 
+Reference solution computed using single-threaded version = 5.764669 
+time = 5.35 s
+Solution computed using 16 threads = 5.764669 
+time = 16
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 11.18 s
+Solution computed using 16 threads = 5.764669 
+time = 16
+The base of the trapezoid is 0.000000 
+Reference solution computed using single-threaded version = 5.764669 
+time = 16.04 s
+Solution computed using 16 threads = 5.764669 
+time = 16
