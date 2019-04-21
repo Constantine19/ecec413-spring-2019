@@ -15,7 +15,7 @@
  */
 
 #ifdef _WIN32
-#  define NOMINMAX 
+#  define NOMINMAX
 #endif
 
 // #define _REENTRANT // Make sure libraries are multi-threading-safe
@@ -34,7 +34,7 @@ typedef struct thread_params {
   int num_traps;
   float a;
   float b;
-  float base_length; 
+  float base_length;
   double *partial_integral;
 } thread_params;
 
@@ -42,8 +42,8 @@ double compute_using_pthreads (float, float, int, float, int);
 double compute_gold (float, float, int, float);
 void *compute_integral(void *);
 void print_args(thread_params);
-int 
-main (int argc, char **argv) 
+int
+main (int argc, char **argv)
 {
     if (argc < 5) {
         printf ("Usage: trap lower-limit upper-limit num-trapezoids num-threads\n");
@@ -60,9 +60,9 @@ main (int argc, char **argv)
 	float b = atof (argv[2]); /* Upper limit */
 	float n = atof (argv[3]); /* Number of trapezoids */
 
-	float h = (b - a)/(float) n; /* Base of each trapezoid */  
+	float h = (b - a)/(float) n; /* Base of each trapezoid */
 	printf ("The base of the trapezoid is %f \n", h);
-        
+
         gettimeofday(&start, NULL);
 	double reference = compute_gold (a, b, n, h);
         gettimeofday(&stop, NULL);
@@ -70,16 +70,16 @@ main (int argc, char **argv)
 
 	/* Write this function to complete the trapezoidal rule using pthreads. */
     int num_threads = atoi (argv[4]); /* Number of threads */
-    
-        
+
+
         gettimeofday(&start, NULL);
-	double pthread_result = compute_using_pthreads (a, b, n, h, num_threads); 
+	double pthread_result = compute_using_pthreads (a, b, n, h, num_threads);
         gettimeofday(&stop, NULL);
 
-	printf ("Solution computed using %d threads = %f \ntime = %ju\n", num_threads, pthread_result, (float) (stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec) / (float) 1000000) );
+	printf ("Solution computed using %d threads = %f \ntime = %0.2f\n", num_threads, pthread_result, (float) (stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec) / (float) 1000000) );
 
     exit(EXIT_SUCCESS);
-} 
+}
 
 
 /*------------------------------------------------------------------
@@ -89,8 +89,8 @@ main (int argc, char **argv)
  * Output: sqrt((1 + x^2)/(1 + x^4))
 
  */
-float 
-f (float x) 
+float
+f (float x)
 {
     return sqrt ((1 + x*x)/(1 + x*x*x*x));
 }
@@ -100,32 +100,32 @@ f (float x)
  * Purpose:     Estimate integral from a to b of f using trap rule and
  *              n trapezoids using a single-threaded version
  * Input args:  a, b, n, h
- * Return val:  Estimate of the integral 
+ * Return val:  Estimate of the integral
  */
-double 
-compute_gold (float a, float b, int n, float h) 
+double
+compute_gold (float a, float b, int n, float h)
 {
    double integral;
    int k;
 
    integral = (f(a) + f(b))/2.0;
 
-   for (k = 1; k <= n-1; k++) 
+   for (k = 1; k <= n-1; k++)
      integral += f(a+k*h);
-   
+
    integral = integral*h;
 
    return integral;
-}  
+}
 
 /* FIXME: Complete this function to perform the trapezoidal rule using pthreads. */
-double 
+double
 compute_using_pthreads (float a, float b, int n, float h, int num_threads)
-{ 
+{
     pthread_t *tids = (pthread_t *) malloc (num_threads * sizeof(pthread_t));
     pthread_attr_t attributes;
     pthread_attr_init (&attributes);
-    
+
     int i;
     double *partial_integral = (double *) malloc (num_threads * sizeof(double));
     thread_params *params = (thread_params *) malloc (num_threads * sizeof(thread_params));
@@ -142,7 +142,7 @@ compute_using_pthreads (float a, float b, int n, float h, int num_threads)
 
     for (i = 0; i < num_threads; i++)
         pthread_create (&tids[i], &attributes, compute_integral, (void *) &params[i]);
-    
+
     for (i = 0; i < num_threads; i++)
         pthread_join(tids[i], NULL);
 
@@ -151,7 +151,7 @@ compute_using_pthreads (float a, float b, int n, float h, int num_threads)
     integral = (f(a) + f(b))/2.0;
     for (i = 0; i < num_threads; i++)
         integral += partial_integral[i];
-    
+
     free ((void *) params);
     free ((void *) partial_integral);
 
@@ -167,7 +167,7 @@ compute_integral (void *args) {
     for (i = 1 + params->tid; i <= params->num_traps - 1; i+=params->num_threads)
         partial_integral += f((params->a + i) * params->base_length);
     params->partial_integral[params->tid] = partial_integral;
-    
+
     pthread_exit (NULL);
 }
 
