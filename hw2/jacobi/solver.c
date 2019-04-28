@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <sys/time.h>
 #include "grid.h" 
 
 extern int compute_gold (grid_t *);
@@ -30,6 +31,7 @@ void *compute_jacobi(void *);
 typedef struct thread_params {
     int tid;
     int chunk_size;
+    int *iterations;
     grid_t *grid_ping;
     grid_t *grid_pong;
 } thread_params;
@@ -50,6 +52,8 @@ main (int argc, char **argv)
     int num_threads = atoi (argv[2]);
     float min_temp = atof (argv[3]);
     float max_temp = atof (argv[4]);
+
+    struct timeval start, stop;
     
     /* Generate the grids and populate them with initial conditions. */
  	grid_t *grid_1 = create_grid (dim, min_temp, max_temp);
@@ -58,8 +62,11 @@ main (int argc, char **argv)
 
 	/* Compute the reference solution using the single-threaded version. */
 	printf ("\nUsing the single threaded version to solve the grid\n");
+        gettimeofday(&start, NULL);
 	int num_iter = compute_gold (grid_1);
+        gettimeofday(&stop, NULL);
 	printf ("Convergence achieved after %d iterations\n", num_iter);
+        printf ("Serial time: %0.2f seconds\n", (float) (stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec) / (float) 1000000) );
     /* Print key statistics for the converged values. */
 	printf ("Printing statistics for the interior grid points\n");
     print_stats (grid_1);
@@ -69,8 +76,11 @@ main (int argc, char **argv)
 	
 	/* Use pthreads to solve the equation using the jacobi method. */
 	printf ("\nUsing pthreads to solve the grid using the jacobi method\n");
+        gettimeofday(&start, NULL);
 	num_iter = compute_using_pthreads_jacobi (grid_2, num_threads);
-	printf ("Convergence achieved after %d iterations\n", num_iter);			
+        gettimeofday(&stop, NULL);
+	printf ("Convergence achieved after %d iterations\n", num_iter);
+        printf ("Parallel time: %0.2f seconds\n", (float) (stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec) / (float) 1000000) );
     printf ("Printing statistics for the interior grid points\n");
 	print_stats (grid_2);
 #ifdef DEBUG
@@ -99,6 +109,8 @@ compute_using_pthreads_jacobi (grid_t *grid, int num_threads)
     pthread_attr_init (&attributes);
     
     grid_t *grid_copy = copy_grid(grid);
+
+    int *iterations = (int *) malloc (num_threads * sizeof(int));
     
     int i;
     thread_params *params = (thread_params *) malloc (num_threads * sizeof(thread_params));
@@ -107,17 +119,20 @@ compute_using_pthreads_jacobi (grid_t *grid, int num_threads)
         for (i = 0; i < num_threads - 1; i++) {
             params[i].tid = i;
             params[i].chunk_size = grid->dim / num_threads;
+            params[i].iterations = iterations;
             params[i].grid_ping = grid;
             params[i].grid_pong = grid_copy;
         }
         params[num_threads-1].tid = num_threads-1;
         params[num_threads-1].chunk_size = grid->dim % num_threads;
+        params[num_threads-1].iterations = iterations;
         params[num_threads-1].grid_ping = grid;
         params[num_threads-1].grid_pong = grid_copy;
     } else {
         for(i = 0; i < num_threads; i++) {
             params[i].tid = i;
             params[i].chunk_size = grid->dim / num_threads;
+            params[i].iterations = iterations;
             params[i].grid_ping = grid;
             params[i].grid_pong = grid_copy;
         }
@@ -129,10 +144,14 @@ compute_using_pthreads_jacobi (grid_t *grid, int num_threads)
     for (i = 0; i < num_threads; i++)
         pthread_join (tids[i], NULL);
 
+    int total_iterations = 0;
+    for (i = 0; i < num_threads; i++)
+        total_iterations = total_iterations + iterations[i];
+
     free ((void *) params);
 
 
-    return 1;
+    return total_iterations;;
 }
 
 void *
@@ -150,6 +169,7 @@ compute_jacobi(void *args) {
     float diff;
     int i,j;
     int m;
+    int iters = 0;
     int done = 0;
 
     while (!done) {
@@ -169,6 +189,8 @@ compute_jacobi(void *args) {
           m++;
         }
       }
+
+      iters++;
       
       temp = grid_ping;
       grid_ping = grid_pong;
@@ -177,6 +199,8 @@ compute_jacobi(void *args) {
       diff = diff / m;
       done = (diff < eps) ? 1 : 0;
     }
+
+    params->iterations[tid] = iters;
 
     pthread_exit(NULL);
 }
