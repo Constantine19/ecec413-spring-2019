@@ -97,18 +97,25 @@ compute_gold (float a, float b, int n, float h)
 double 
 compute_using_omp (float a, float b, int n, float h, int num_threads)
 {
-	double integral = 0.0;
+    double integral = 0.0;
     int k;
 
-    // Initialize
-    #pragma omp parallel default(none) shared(a, h, n) private(k) reduction(+:integral)
+    // Initialization of the integralfrom a single thread
+    integral = (f(a) + f(b))/2.0;
+
+    // Setting up number of threads
+    omp_set_num_threads(num_threads);
+    
+    // Parallelization part
+    #pragma omp parallel default(none) shared(a, b, h, n) private(k) reduction(+: integral)
     {
         for (k = 0; k < n-1; k++)
         {
             integral = integral + f(a + k * h);
         }
+        // printf("With %d trapeziods, the estimate for the integral between [%f, %f] is %f \n", n, a, b, integral);
+        integral = integral * h;
     }
-
     return integral;
 }
 
